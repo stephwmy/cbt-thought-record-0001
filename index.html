@@ -18,13 +18,18 @@
         body { background: var(--bg-color); color: var(--text-main); padding-bottom: 60px; }
         
         /* 鎖定頁面 */
-        #lock-screen { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--primary-grad); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
-        .pin-input { font-size: 24px; padding: 10px; width: 150px; text-align: center; border-radius: 8px; border: none; margin-top: 20px; }
+        #lock-screen { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--primary-grad); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; color: white; overflow-y: auto; padding: 40px 20px; }
+        .pin-container { text-align: center; margin-bottom: 40px; width: 100%; max-width: 400px; }
+        .pin-input { font-size: 24px; padding: 10px; width: 150px; text-align: center; border-radius: 8px; border: none; margin-top: 20px; color: #2d3748; }
         
+        /* 在鎖定頁面顯示的歷史紀錄樣式 */
+        .lock-records-box { width: 100%; max-width: 500px; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .lock-records-box h3 { border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 10px; margin-bottom: 15px; text-align: center; }
+
         header { background: var(--primary-grad); color: white; padding: 20px; text-align: center; font-weight: bold; font-size: 22px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         
         /* 導覽列 */
-        .tabs { display: flex; justify-content: space-around; background: white; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        .tabs { display: flex; justify-content: space-around; background: white; border-bottom: 1px solid #e2e8f0; sticky: top; }
         .tab { flex: 1; text-align: center; padding: 15px 0; cursor: pointer; font-weight: bold; color: #718096; border-bottom: 3px solid transparent; }
         .tab.active { color: #764ba2; border-bottom-color: #764ba2; }
 
@@ -33,26 +38,27 @@
 
         /* 卡片與表單要素 */
         .card { background: var(--card-bg); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .card-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #4a5568; display: flex; align-items: center; gap: 8px; justify-content: space-between; }
+        .card-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #4a5568; display: flex; align-items: center; gap: 8px; }
         label { display: block; font-weight: 600; margin-bottom: 8px; margin-top: 12px; }
         select, textarea, input[type="text"] { width: 100%; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 16px; outline: none; margin-bottom: 10px; }
         textarea { resize: vertical; min-height: 80px; }
         
         /* 滑桿組件 */
         .slider-container { display: flex; align-items: center; gap: 15px; margin-top: 5px; width: 100%; }
-        input[type="range"] { flex: 1; accent-color: #764ba2; }
+        input[type="range"] { flex: 1; accent-color: #764ba2; cursor: pointer; }
         .slider-val { font-weight: bold; min-width: 45px; text-align: right; color: #764ba2; }
+        .lock-records-box .slider-val { color: #fff; }
 
         /* 動態多項輸入 */
-        .dynamic-row { display: flex; flex-direction: column; background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #edf2f7; }
-        .input-group { display: flex; gap: 10px; align-items: center; width: 100%; }
-        .btn-add { background: #e2e8f0; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 5px; }
+        .dynamic-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; width: 100%; }
+        .thought-block { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 10px; margin-bottom: 15px; position: relative; }
+        .btn-add { background: #e2e8f0; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
         .btn-del { background: #fed7d7; color: #e53e3e; border: none; padding: 12px; border-radius: 8px; cursor: pointer; }
-        .btn-shortcut { background: #faf5ff; border: 1px solid #e9d8fd; color: #764ba2; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; }
+        .btn-del-thought { position: absolute; top: 12px; right: 12px; background: #fed7d7; color: #e53e3e; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-weight: bold; }
 
         /* 情緒按鈕格線 */
         .emotion-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .emotion-btn { background: #f7fafc; border: 2px solid #e2e8f0; padding: 12px; border-radius: 10px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; font-weight: bold; font-size: 15px; }
+        .emotion-btn { background: #f7fafc; border: 2px solid #e2e8f0; padding: 12px; border-radius: 10px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; font-weight: bold; font-size: 15px; color: var(--text-main); }
         .emotion-btn.selected { background: #faf5ff; border-color: var(--purple-active); }
         .emotion-slider-box { display: none; width: 100%; margin-top: 10px; }
         .emotion-btn.selected .emotion-slider-box { display: block; }
@@ -66,38 +72,48 @@
         .btn-submit { width: 100%; background: var(--primary-grad); color: white; border: none; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(118,75,162,0.3); }
 
         /* 歷史紀錄顯示頁 */
-        .record-card { border-left: 5px solid #764ba2; }
+        .record-card { border-left: 5px solid #764ba2; text-align: left; margin-bottom: 15px; color: var(--text-main); }
+        .lock-records-box .record-card { background: rgba(255, 255, 255, 0.9); }
         .record-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .record-details { display: none; margin-top: 15px; border-top: 1px solid #edf2f7; padding-top: 15px; }
         .record-details.open { display: block; }
-        .badge { background: #edf2f7; padding: 3px 8px; border-radius: 12px; font-size: 12px; margin-right: 5px; display: inline-block; }
+        .badge { background: #edf2f7; color: #4a5568; padding: 3px 8px; border-radius: 12px; font-size: 12px; margin-right: 5px; display: inline-block; font-weight: bold; }
         .badge-emotion { background: #faf5ff; color: #764ba2; border: 1px solid #e9d8fd; }
-        .thought-list-item { margin-bottom: 8px; list-style-position: inside; }
 
         /* 數據洞察儀表板 */
         .stat-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px; }
-        .stat-card { background: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); border-top: 4px solid #764ba2; }
-        .stat-num { font-size: 28px; font-weight: bold; color: #764ba2; margin-top: 5px; }
+        .stat-card { background: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .stat-num { font-size: 32px; font-weight: bold; color: #764ba2; margin-top: 5px; }
         .list-ranking { list-style: none; }
         .list-ranking li { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edf2f7; }
     </style>
 </head>
 <body>
 
-    <!-- 密碼鎖定畫面 -->
+    <!-- 密碼鎖定畫面 + 我的日記歷史紀錄 -->
     <div id="lock-screen">
-        <h2>安全驗證</h2>
-        <p>請輸入安全個人密碼 (預設: 1234)</p>
-        <input type="password" id="pin-field" class="pin-input" placeholder="請輸入密碼" maxlength="4" oninput="verifyPIN()">
+        <div class="pin-container">
+            <h2>安全驗證</h2>
+            <p>請輸入安全個人密碼 (預設: 1234)</p>
+            <input type="password" id="pin-field" class="pin-input" placeholder="請輸入密碼" maxlength="4" oninput="verifyPIN()">
+        </div>
+
+        <!-- 密碼未解鎖前可直接查閱的歷史日記 -->
+        <div class="lock-records-box">
+            <h3>📖 我的日記歷史回顧</h3>
+            <div id="lock-records-list">
+                <!-- 這裡會自動加載 LocalStorage 內的日記紀錄 -->
+            </div>
+        </div>
     </div>
 
     <header>CBT 心靈思維日記</header>
 
     <!-- 分頁導覽欄 -->
     <div class="tabs">
-        <div id="nav-new-record" class="tab active" onclick="switchTab('new-record')">新建記錄</div>
-        <div id="nav-my-records" class="tab" onclick="switchTab('my-records'); renderRecords();">我的日記</div>
-        <div id="nav-insights" class="tab" onclick="switchTab('insights'); renderInsights();">數據洞察</div>
+        <div class="tab active" onclick="switchTab('new-record')">新建記錄</div>
+        <div class="tab" onclick="switchTab('my-records'); renderRecords('main-records-list');">我的日記</div>
+        <div class="tab" onclick="switchTab('insights'); renderInsights();">數據洞察</div>
     </div>
 
     <!-- 主要內容區 -->
@@ -105,10 +121,7 @@
     <div id="new-record" class="container active">
         <!-- 位置區域 -->
         <div class="card">
-            <div class="card-title">
-                <span>📍 當前位置</span>
-                <button class="btn-shortcut" onclick="switchTab('my-records'); renderRecords();">前往我的日記 📂</button>
-            </div>
+            <div class="card-title">📍 當前位置</div>
             <select id="location-select" onchange="toggleCustomLoc()">
                 <option value="家中">家中</option>
                 <option value="醫院">醫院</option>
@@ -122,22 +135,20 @@
         <!-- 情境事件 -->
         <div class="card">
             <div class="card-title">📌 情境事件</div>
-            <label>當時發生了什麼事？(請客觀描述事實)</label>
+            <label>當時發生了什麼事？(請客觀客描述事實)</label>
             <textarea id="event-text" placeholder="例如：在開會報告時，主管打斷了我的發言..."></textarea>
         </div>
 
-        <!-- 自動思維 -->
+        <!-- 自動思維 (包含獨立的相信程度滑桿) -->
         <div class="card">
-            <div class="card-title">💭 自動思維</div>
-            <label>當時腦海裡浮現出什麼想法？請為每項想法評估相信程度：</label>
+            <div class="card-title">💭 自動思維與真實度</div>
+            <label>當時腦海裡浮現出什麼想法？請為個別想法評估相信程度：</label>
             <div id="thoughts-container">
-                <div class="dynamic-row">
-                    <div class="input-group">
-                        <input type="text" class="thought-input" placeholder="想法內容...">
-                    </div>
-                    <label style="font-size:13px; color:#718096; margin-top:8px;">對此想法的相信程度：</label>
+                <div class="thought-block">
+                    <input type="text" class="thought-input" placeholder="想法內容...">
+                    <label style="font-size:14px; color:#4a5568;">您對此想法的相信程度？</label>
                     <div class="slider-container">
-                        <input type="range" class="thought-belief" min="0" max="100" value="50" oninput="updateSliderText(this)">
+                        <input type="range" class="thought-intensity" min="0" max="100" value="50" oninput="updateSliderText(this)">
                         <span class="slider-val">50%</span>
                     </div>
                 </div>
@@ -255,7 +266,7 @@
             <div class="card-title">🎯 行為與應對</div>
             <label>你當時做了什麼來應對？(可新增多項)</label>
             <div id="coping-container">
-                <div class="dynamic-row" style="flex-direction:row; padding:0; border:none; background:transparent;">
+                <div class="dynamic-row">
                     <input type="text" class="coping-input" placeholder="例如：深呼吸、離開現場...">
                 </div>
             </div>
@@ -268,7 +279,7 @@
 
     <!-- 2. 歷史記錄查看頁 -->
     <div id="my-records" class="container">
-        <div id="records-list"><!-- 動態生成 --></div>
+        <div id="main-records-list"><!-- 動態生成 --></div>
     </div>
 
     <!-- 3. 數據統計與洞察面版 -->
@@ -292,6 +303,11 @@
     </div>
 
     <script>
+        // 初始化加載：解鎖頁面第一時間渲染「我的日記」
+        document.addEventListener("DOMContentLoaded", () => {
+            renderRecords('lock-records-list');
+        });
+
         // 安全 PIN 驗證 (預設 1234)
         function verifyPIN() {
             const pin = document.getElementById('pin-field').value;
@@ -305,12 +321,10 @@
             document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
-            
-            // 對應高亮導覽列按鈕
-            document.getElementById('nav-' + tabId).classList.add('active');
+            event.target.classList.add('active');
         }
 
-        // 即時顯示數值
+        // 即時顯示滑桿數值
         function updateSliderText(slider) {
             slider.nextElementSibling.innerText = slider.value + '%';
         }
@@ -322,19 +336,17 @@
             customInput.style.display = (select.value === '其他') ? 'block' : 'none';
         }
 
-        // 動態增減想法輸入列 (含獨立相信程度滑桿)
+        // 動態增減想法欄位（包含獨立真實度滑桿）
         function addThoughtField() {
             const container = document.getElementById('thoughts-container');
             const div = document.createElement('div');
-            div.className = 'dynamic-row';
+            div.className = 'thought-block';
             div.innerHTML = `
-                <div class="input-group">
-                    <input type="text" class="thought-input" placeholder="想法內容...">
-                    <button class="btn-del" onclick="this.parentElement.parentElement.remove()">✕</button>
-                </div>
-                <label style="font-size:13px; color:#718096; margin-top:8px;">對此想法的相信程度：</label>
+                <button class="btn-del-thought" onclick="this.parentElement.remove()">✕</button>
+                <input type="text" class="thought-input" placeholder="想法內容...">
+                <label style="font-size:14px; color:#4a5568;">您對此想法的相信程度？</label>
                 <div class="slider-container">
-                    <input type="range" class="thought-belief" min="0" max="100" value="50" oninput="updateSliderText(this)">
+                    <input type="range" class="thought-intensity" min="0" max="100" value="50" oninput="updateSliderText(this)">
                     <span class="slider-val">50%</span>
                 </div>
             `;
@@ -345,8 +357,7 @@
             const container = document.getElementById('coping-container');
             const div = document.createElement('div');
             div.className = 'dynamic-row';
-            div.style = "flex-direction:row; padding:0; border:none; background:transparent; margin-bottom:10px;";
-            div.innerHTML = `<input type="text" class="coping-input" placeholder="應對方式..."><button class="btn-del" style="margin-left:10px;" onclick="this.parentElement.remove()">✕</button>`;
+            div.innerHTML = `<input type="text" class="coping-input" placeholder="應對方式..."><button class="btn-del" onclick="this.parentElement.remove()">✕</button>`;
             container.appendChild(div);
         }
 
@@ -367,14 +378,14 @@
             const locSelect = document.getElementById('location-select').value;
             const finalLocation = locSelect === '其他' ? document.getElementById('custom-location').value : locSelect;
             
-            // 讀取每條想法內容及其配對的滑桿值
-            const thoughtRows = document.querySelectorAll('#thoughts-container .dynamic-row');
-            const thoughtsArray = [];
-            thoughtRows.forEach(row => {
-                const text = row.querySelector('.thought-input').value;
-                const belief = row.querySelector('.thought-belief').value;
-                if(text) {
-                    thoughtsArray.push({ text: text, belief: parseInt(belief) });
+            // 抓取多個獨立想法與其各自的強度
+            const thoughtBlocks = document.querySelectorAll('.thought-block');
+            const thoughtsData = [];
+            thoughtBlocks.forEach(block => {
+                const text = block.querySelector('.thought-input').value;
+                const intensity = block.querySelector('.thought-intensity').value;
+                if(text.trim() !== "") {
+                    thoughtsData.push({ text: text, belief: parseInt(intensity) });
                 }
             });
 
@@ -394,7 +405,7 @@
                 date: new Date().toLocaleString('zh-HK'),
                 location: finalLocation || '未指定地點',
                 event: document.getElementById('event-text').value,
-                thoughts: thoughtsArray, // 儲存為帶有真實度之陣列對象
+                thoughts: thoughtsData, // 結構化儲存想法和對應真實度
                 emotions: selectedEmotions,
                 bodyParts: selectedBodyParts,
                 physicalText: document.getElementById('physical-text').value,
@@ -407,8 +418,11 @@
 
             alert('日記已成功安全儲存！');
             resetForm();
+            
+            // 同步重新渲染鎖定頁面與主頁面的清單
+            renderRecords('lock-records-list');
             switchTab('my-records');
-            renderRecords();
+            renderRecords('main-records-list');
         }
 
         function resetForm() {
@@ -417,33 +431,41 @@
             document.getElementById('custom-location').value = '';
             document.getElementById('location-select').selectedIndex = 0;
             document.getElementById('thoughts-container').innerHTML = `
-                <div class="dynamic-row">
-                    <div class="input-group">
-                        <input type="text" class="thought-input" placeholder="想法內容...">
-                    </div>
-                    <label style="font-size:13px; color:#718096; margin-top:8px;">對此想法的相信程度：</label>
+                <div class="thought-block">
+                    <input type="text" class="thought-input" placeholder="想法內容...">
+                    <label style="font-size:14px; color:#4a5568;">您對此想法的相信程度？</label>
                     <div class="slider-container">
-                        <input type="range" class="thought-belief" min="0" max="100" value="50" oninput="updateSliderText(this)">
+                        <input type="range" class="thought-intensity" min="0" max="100" value="50" oninput="updateSliderText(this)">
                         <span class="slider-val">50%</span>
                     </div>
-                </div>
-            `;
-            document.getElementById('coping-container').innerHTML = `<div class="dynamic-row" style="flex-direction:row; padding:0; border:none; background:transparent;"><input type="text" class="coping-input" placeholder="例如：深呼吸、離開現場..."></div>`;
+                </div>`;
+            document.getElementById('coping-container').innerHTML = `<div class="dynamic-row"><input type="text" class="coping-input" placeholder="例如：深呼吸、離開現場..."></div>`;
             document.querySelectorAll('.emotion-btn').forEach(b => b.classList.remove('selected'));
             document.querySelectorAll('.part').forEach(p => p.classList.remove('selected'));
         }
 
-        // 渲染歷史日記
-        function renderRecords() {
-            const list = document.getElementById('records-list');
+        // 渲染日記功能 (支持渲染到主頁面或鎖定登入頁面)
+        function renderRecords(targetElementId) {
+            const list = document.getElementById(targetElementId);
+            if (!list) return;
+            
             const records = JSON.parse(localStorage.getItem('cbt_records')) || [];
             
             if(records.length === 0) {
-                list.innerHTML = '<p style="text-align:center; color:#a0aec0; margin-top:20px;">尚無任何日記記錄。</p>';
+                list.innerHTML = '<p style="text-align:center; color:#e2e8f0; margin:10px 0;">尚無任何日記記錄。</p>';
                 return;
             }
 
-            list.innerHTML = records.map(r => `
+            list.innerHTML = records.map(r => {
+                // 相容舊資料格式，確保單一字串陣列或物件陣列皆能正確渲染
+                const thoughtsHTML = r.thoughts.map(t => {
+                    if (typeof t === 'object') {
+                        return `<li>${t.text} <span class="badge" style="background:#edf2f7; color:#764ba2;">真實度: ${t.belief}%</span></li>`;
+                    }
+                    return `<li>${t}</li>`;
+                }).join('');
+
+                return `
                 <div class="card record-card">
                     <div class="record-header" onclick="this.nextElementSibling.classList.toggle('open')">
                         <div>
@@ -455,25 +477,23 @@
                         <span style="color:#764ba2; font-size:14px;">展開 ▾</span>
                     </div>
                     <div class="record-details">
-                        <p><strong>💭 自動思維與相信程度:</strong></p>
-                        <ul style="margin-left:5px; padding-left:10px;">
-                            ${r.thoughts && r.thoughts.map ? r.thoughts.map(t => `<li class="thought-list-item">${t.text} <span class="badge" style="color:#764ba2; background:#faf5ff; border:1px solid #e9d8fd;">相信度: ${t.belief}%</span></li>`).join('') : '<li>無相關數據</li>'}
-                        </ul>
+                        <p><strong>💭 自動思維及個別真實度:</strong></p>
+                        <ul style="padding-left:15px; margin-top:5px;">${thoughtsHTML}</ul>
                         
-                        <p style="margin-top:12px;"><strong>😊 情緒感受:</strong></p>
-                        <div style="margin-top:4px;">${r.emotions.map(e => `<span class="badge badge-emotion">${e.name}: ${e.intensity}%</span>`).join('')}</div>
+                        <p style="margin-top:10px;"><strong>😊 情緒感受:</strong></p>
+                        <div style="margin-top:5px;">${r.emotions.map(e => `<span class="badge badge-emotion">${e.name}: ${e.intensity}%</span>`).join('')}</div>
                         
-                        <p style="margin-top:12px;"><strong>💪 生理反應:</strong></p>
-                        <div>影響部位: ${r.bodyParts.join(', ') || '無'}</div>
+                        <p style="margin-top:10px;"><strong>💪 生理反應:</strong></p>
+                        <div style="margin-top:2px;">影響部位: ${r.bodyParts.join(', ') || '無'}</div>
                         <div style="font-style:italic; color:#718096; margin-top:2px;">細節: ${r.physicalText || '無'}</div>
                         
-                        <p style="margin-top:12px;"><strong>🎯 採取應對措施:</strong></p>
-                        <ul style="margin-left:5px; padding-left:10px;">${r.coping.map(c => `<li>${c}</li>`).join('')}</ul>
+                        <p style="margin-top:10px;"><strong>🎯 採取應對措施:</strong></p>
+                        <ul style="padding-left:15px; margin-top:5px;">${r.coping.map(c => `<li>${c}</li>`).join('')}</ul>
                         
                         <button class="btn-del" style="margin-top:15px; padding:6px 12px; font-size:12px;" onclick="deleteRecord(${r.id})">刪除此筆記錄</button>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function deleteRecord(id) {
@@ -481,11 +501,14 @@
                 let records = JSON.parse(localStorage.getItem('cbt_records')) || [];
                 records = records.filter(r => r.id !== id);
                 localStorage.setItem('cbt_records', JSON.stringify(records));
-                renderRecords();
+                
+                // 同步刷新兩個頁面的列表
+                renderRecords('lock-records-list');
+                renderRecords('main-records-list');
             }
         }
 
-        // 數據分析與洞察
+        // 分析與洞察面版數據運算
         function renderInsights() {
             const records = JSON.parse(localStorage.getItem('cbt_records')) || [];
             document.getElementById('stat-total-records').innerText = records.length;
@@ -496,22 +519,4 @@
                 return;
             }
 
-            // 統計情緒頻率
-            const emotionCounts = {};
-            records.forEach(r => r.emotions.forEach(e => {
-                emotionCounts[e.name] = (emotionCounts[e.name] || 0) + 1;
-            }));
-            const sortedEmotions = Object.entries(emotionCounts).sort((a,b) => b - a);
-            document.getElementById('stat-emotions').innerHTML = sortedEmotions.map(([name, count]) => `<li><span>${name}</span><strong>${count} 次</strong></li>`).join('') || '<li>無情緒數據</li>';
-
-            // 統計應對機制
-            const copingCounts = {};
-            records.forEach(r => r.coping.forEach(c => {
-                copingCounts[c] = (copingCounts[c] || 0) + 1;
-            }));
-            const sortedCoping = Object.entries(copingCounts).sort((a,b) => b - a).slice(0, 5);
-            document.getElementById('stat-coping').innerHTML = sortedCoping.map(([tool, count]) => `<li><span>${tool}</span><strong>${count} 次</strong></li>`).join('') || '<li>無應對數據</li>';
-        }
-    </script>
-</body>
-</html>
+            
