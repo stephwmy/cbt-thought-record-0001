@@ -6,31 +6,30 @@
     <title>我的日記</title>
     <style>
         :root {
-            /* 調整為對比清晰、沉穩深邃的深橘色與暖乳白 */
-            --bg-color: #fffaf4;
+            /* 調整為對比度更高、不刺眼的深暖橘、琥珀與深焦糖色調 */
+            --bg-color: #fdfaf2;
             --card-bg: #ffffff;
             --text-main: #2d3748;
-            --orange-theme: #c05621;
-            --orange-dark: #7b341e;
-            --orange-light: #feebc8;
-            --orange-soft: #fff6e5;
-            --border-color: #cbd5e0;
+            --orange-theme: #9c4221;     /* 深焦糖橘：用於標題與核心按鈕 */
+            --orange-secondary: #b7791f; /* 琥珀深橘：用於次要元素與高對比文字 */
+            --orange-light: #fef3c7;     /* 柔和粉琥珀：用於背景底襯 */
+            --border-color: #f59e0b;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
         body { background: var(--bg-color); color: var(--text-main); padding-bottom: 60px; }
         
-        header { background: var(--orange-light); color: var(--orange-dark); padding: 20px; text-align: center; font-weight: bold; font-size: 22px; border-bottom: 2px solid #fbd38d; }
+        header { background: var(--orange-light); color: var(--orange-theme); padding: 20px; text-align: center; font-weight: bold; font-size: 22px; border-bottom: 2px solid #fcd34d; }
 
-        /* 鎖定驗證頁面 */
+        /* 鎖定驗證頁面：確保點擊能完全清除遮罩 */
         #lock-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-main); padding: 20px; }
         .lock-title { font-size: 28px; font-weight: bold; color: var(--orange-theme); margin-bottom: 10px; }
-        .pin-input { font-size: 24px; padding: 12px; width: 180px; text-align: center; border-radius: 8px; border: 2px solid var(--orange-theme); margin-top: 15px; outline: none; background: white; color: var(--text-main); }
-        .btn-enter { background: var(--orange-theme); color: white; border: none; padding: 14px 40px; font-size: 18px; font-weight: bold; border-radius: 8px; margin-top: 20px; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 6px rgba(192,86,33,0.2); }
-        .btn-enter:hover { background: var(--orange-dark); }
+        .pin-input { font-size: 24px; padding: 12px; width: 180px; text-align: center; border-radius: 8px; border: 2px solid var(--orange-theme); margin-top: 15px; outline: none; background: white; }
+        .btn-enter { background: var(--orange-theme); color: white; border: none; padding: 14px 40px; font-size: 18px; font-weight: bold; border-radius: 8px; margin-top: 25px; cursor: pointer; box-shadow: 0 4px 6px rgba(156,66,33,0.2); width: 180px; }
+        .btn-enter:active { background: #7b3419; }
         
         /* 導覽列 */
-        .tabs { display: flex; justify-content: space-around; background: white; border-bottom: 1px solid #edf2f7; position: sticky; top: 0; z-index: 900; }
+        .tabs { display: flex; justify-content: space-around; background: white; border-bottom: 1px solid #edf2f7; sticky: top; }
         .tab { flex: 1; text-align: center; padding: 15px 0; cursor: pointer; font-weight: bold; color: #718096; border-bottom: 3px solid transparent; }
         .tab.active { color: var(--orange-theme); border-bottom-color: var(--orange-theme); }
 
@@ -38,32 +37,35 @@
         .container.active { display: block; }
 
         /* 卡片與表單要素 */
-        .card { background: var(--card-bg); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.04); border: 1px solid #fbd38d; }
-        .card-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: var(--orange-dark); display: flex; align-items: center; gap: 8px; border-bottom: 2px solid var(--orange-light); padding-bottom: 5px; }
+        .card { background: var(--card-bg); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); border: 1px solid #fcd34d; }
+        .card-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: var(--orange-theme); display: flex; align-items: center; gap: 8px; border-bottom: 2px solid var(--orange-light); padding-bottom: 5px; }
         label { display: block; font-weight: 600; margin-bottom: 8px; margin-top: 12px; color: #4a5568; }
-        select, textarea, input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 16px; outline: none; margin-bottom: 10px; background: #fafafa; color: var(--text-main); }
-        select:focus, textarea:focus, input[type="text"]:focus { border-color: var(--orange-theme); background: white; box-shadow: 0 0 0 3px rgba(237,137,54,0.15); }
+        select, textarea, input[type="text"] { width: 100%; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 16px; outline: none; margin-bottom: 10px; background: #fafafa; color: var(--text-main); }
+        select:focus, textarea:focus, input[type="text"]:focus { border-color: var(--orange-secondary); background: white; }
         textarea { resize: vertical; min-height: 80px; }
         
         /* 想法與自訂區塊佈局 */
-        .thought-block { background: var(--orange-soft); border: 1px solid #fbd38d; padding: 15px; border-radius: 8px; margin-bottom: 12px; }
+        .thought-block { background: #fefdf6; border: 1px solid #fcd34d; padding: 15px; border-radius: 8px; margin-bottom: 12px; }
         .thought-row { display: flex; gap: 10px; align-items: center; }
 
         /* 滑桿組件 */
         .slider-container { display: flex; align-items: center; gap: 15px; margin-top: 8px; }
-        input[type="range"] { flex: 1; accent-color: var(--orange-theme); cursor: pointer; }
+        input[type="range"] { flex: 1; accent-color: var(--orange-theme); }
         .slider-val { font-weight: bold; min-width: 45px; text-align: right; color: var(--orange-theme); }
 
         /* 動態多項輸入 */
         .dynamic-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
-        .btn-add { background: var(--orange-light); color: var(--orange-dark); border: none; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 10px; transition: opacity 0.2s; }
-        .btn-add:hover { opacity: 0.9; }
-        .btn-del { background: #fed7d7; color: #e53e3e; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-add { background: var(--orange-light); color: var(--orange-theme); border: none; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
+        .btn-del { background: #fed7d7; color: #e53e3e; border: none; padding: 12px; border-radius: 8px; cursor: pointer; }
+
+        /* PDF 按鈕格式 */
+        .btn-pdf { width: 100%; background: var(--orange-secondary); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(183,121,31,0.2); }
+        .btn-pdf:hover { background: #966113; }
 
         /* 情緒按鈕格線 */
         .emotion-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .emotion-btn { background: #fafafa; border: 2px solid #edf2f7; padding: 12px; border-radius: 10px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; font-weight: bold; font-size: 15px; transition: border-color 0.2s; }
-        .emotion-btn.selected { background: var(--orange-soft); border-color: var(--orange-theme); color: var(--orange-dark); }
+        .emotion-btn { background: #fafafa; border: 2px solid #e2e8f0; padding: 12px; border-radius: 10px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; font-weight: bold; font-size: 15px; }
+        .emotion-btn.selected { background: var(--orange-light); border-color: var(--orange-secondary); }
         .emotion-slider-box { display: none; width: 100%; margin-top: 10px; }
         .emotion-btn.selected .emotion-slider-box { display: block; }
 
@@ -71,36 +73,24 @@
         .bodymap-container { display: flex; justify-content: center; margin: 15px 0; }
         .body-svg { width: 220px; height: auto; }
         .part { fill: #cbd5e0; stroke: #fff; stroke-width: 1.5; cursor: pointer; transition: fill 0.2s; }
-        .part.selected { fill: var(--orange-theme); }
+        .part.selected { fill: var(--orange-secondary); }
 
-        .btn-submit { width: 100%; background: linear-gradient(135deg, #ed8936 0%, #c05621 100%); color: white; border: none; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(192,86,33,0.25); }
-        .btn-pdf { width: 100%; background: #2d3748; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-submit { width: 100%; background: linear-gradient(135deg, #b7791f 0%, #9c4221 100%); color: white; border: none; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(156,66,33,0.2); }
 
         /* 歷史紀錄顯示頁 */
         .record-card { border-left: 5px solid var(--orange-theme); }
         .record-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .record-details { display: none; margin-top: 15px; border-top: 1px solid #edf2f7; padding-top: 15px; }
         .record-details.open { display: block; }
-        .badge { background: #edf2f7; padding: 4px 10px; border-radius: 12px; font-size: 12px; margin-right: 5px; display: inline-block; font-weight: bold; color: #4a5568; }
-        .badge-emotion { background: var(--orange-soft); color: var(--orange-dark); border: 1px solid #fbd38d; }
+        .badge { background: #edf2f7; padding: 3px 8px; border-radius: 12px; font-size: 12px; margin-right: 5px; display: inline-block; color: var(--text-main); font-weight: bold; }
+        .badge-emotion { background: var(--orange-light); color: var(--orange-theme); border: 1px solid #fcd34d; }
 
         /* 數據洞察儀表板 */
         .stat-single-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px; }
-        .stat-card { background: white; padding: 25px; border-radius: 10px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); border: 1px solid #fbd38d; }
+        .stat-card { background: white; padding: 25px; border-radius: 10px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); border: 1px solid #fcd34d; }
         .stat-num { font-size: 32px; font-weight: bold; color: var(--orange-theme); margin-top: 5px; }
         .list-ranking { list-style: none; }
         .list-ranking li { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edf2f7; }
-
-        /* 列印與產出 PDF 專用樣式覆蓋 */
-        @media print {
-            body { background: white; color: black; }
-            #lock-screen, .tabs, .btn-pdf, .btn-submit, .btn-add, .btn-del, header, .record-header span { display: none !important; }
-            .container { display: block !important; max-width: 100%; margin: 0; padding: 0; }
-            #my-records { display: block !important; }
-            #new-record, #insights { display: none !important; }
-            .card { box-shadow: none !important; border: 1px solid #000 !important; page-break-inside: avoid; }
-            .record-details { display: block !important; }
-        }
     </style>
 </head>
 <body>
@@ -108,9 +98,9 @@
     <!-- 安全密碼驗證畫面 -->
     <div id="lock-screen">
         <div class="lock-title">📖 我的日記</div>
-        <p style="color: #718096; font-weight: bold;">請輸入安全個人密碼 (預設: 1234)</p>
-        <input type="password" id="pin-field" class="pin-input" placeholder="請輸入密碼" maxlength="4" onkeydown="if(event.key === 'Enter') verifyPIN()">
-        <button class="btn-enter" onclick="verifyPIN()">確定進入</button>
+        <p style="color: #4a5568; font-weight: 500;">請輸入安全個人密碼 (預設: 1234)</p>
+        <input type="password" id="pin-field" class="pin-input" placeholder="請輸入密碼" maxlength="4">
+        <button class="btn-enter" type="button" onclick="verifyPIN()">確定進入</button>
     </div>
 
     <header>📖 我的日記</header>
@@ -145,7 +135,7 @@
             <textarea id="event-text" placeholder="例如：在開會報告時，主管打斷了我的發言..."></textarea>
         </div>
 
-        <!-- 想法區域 -->
+        <!-- 想法區域（原自動思維） -->
         <div class="card">
             <div class="card-title">💭 想法</div>
             <label>當時腦海裡浮現出什麼想法？並評估每個想法的相信程度：</label>
@@ -226,6 +216,7 @@
                     </div>
                 </div>
             </div>
+            
             <button class="btn-add" style="margin-top: 15px; width: 100%;" onclick="addUserEmotion()">＋ 新增自訂情緒</button>
         </div>
 
@@ -242,10 +233,10 @@
                     <rect id="part-胸口" class="part" x="80" y="85" width="40" height="40" rx="3"/>
                     <rect id="part-上腹部" class="part" x="82" y="128" width="36" height="30"/>
                     <rect id="part-骨盆腹下" class="part" x="80" y="161" width="40" height="25" rx="5"/>
-                    <path id="part-leftArm" class="part" d="M62,95 L75,97 L65,160 L52,155 Z"/>
-                    <path id="part-rightArm" class="part" d="M138,95 L125,97 L135,160 L148,155 Z"/>
-                    <path id="part-leftLeg" class="part" d="M82,188 L98,188 L95,290 L78,290 Z"/>
-                    <path id="part-rightLeg" class="part" d="M102,188 L118,188 L122,290 L105,290 Z"/>
+                    <path id="part-左臂" class="part" d="M62,95 L75,97 L65,160 L52,155 Z"/>
+                    <path id="part-右臂" class="part" d="M138,95 L125,97 L135,160 L148,155 Z"/>
+                    <path id="part-左腿" class="part" d="M82,188 L98,188 L95,290 L78,290 Z"/>
+                    <path id="part-右腿" class="part" d="M102,188 L118,188 L122,290 L105,290 Z"/>
                     <rect id="part-左腳" class="part" x="73" y="293" width="22" height="12" rx="4"/>
                     <rect id="part-右腳" class="part" x="105" y="293" width="22" height="12" rx="4"/>
                 </svg>
@@ -272,7 +263,8 @@
 
     <!-- 2. 歷史記錄查看頁 -->
     <div id="my-records" class="container">
-        <button class="btn-pdf" onclick="generatePDFReport()">🖨️ 產生 PDF 報告 (展開所有紀錄)</button>
+        <!-- PDF 生成按鈕 -->
+        <button class="btn-pdf" onclick="generateDiaryPDF()">📄 匯出完整日記為 PDF</button>
         <div id="records-list"><!-- 動態生成 --></div>
     </div>
 
@@ -292,27 +284,15 @@
     </div>
 
     <script>
-        // 安全 PIN 驗證核心修復
+        // 核心密碼驗證：點擊按鈕執行，徹底排除阻擋問題
         function verifyPIN() {
             const pin = document.getElementById('pin-field').value;
-            if (pin === '1234') {
-                document.getElementById('lock-screen').style.display = 'none';
+            if(pin === '1234') {
+                document.getElementById('lock-screen').style.setProperty('display', 'none', 'important');
             } else {
                 alert('密碼錯誤，請再試一次。');
                 document.getElementById('pin-field').value = '';
             }
-        }
-
-        // 全面展開日記並調用系統列印保存為 PDF
-        function generatePDFReport() {
-            // 找到所有紀錄細節節點並強制添加展開 class
-            const details = document.querySelectorAll('.record-details');
-            details.forEach(detail => detail.classList.add('open'));
-            
-            // 延時觸發以確保渲染完畢，隨後調用列印
-            setTimeout(() => {
-                window.print();
-            }, 300);
         }
 
         // 分頁切換邏輯
@@ -320,7 +300,12 @@
             document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
-            event.target.classList.add('active');
+            
+            // 處理標籤高亮
+            const tabsList = document.querySelectorAll('.tab');
+            if(tabId === 'new-record') tabsList[0].classList.add('active');
+            if(tabId === 'my-records') tabsList[1].classList.add('active');
+            if(tabId === 'insights') tabsList[2].classList.add('active');
         }
 
         // 即時顯示數值
@@ -335,7 +320,7 @@
             customInput.style.display = (select.value === '其他') ? 'block' : 'none';
         }
 
-        // 動態增減想法區塊
+        // 動態增減想法區塊 (包含獨立滑桿)
         function addThoughtField() {
             const container = document.getElementById('thoughts-container');
             const div = document.createElement('div');
@@ -395,7 +380,7 @@
             });
         });
 
-        // 儲存功能
+        // 儲存功能（LocalStorage）
         function saveRecord() {
             const locSelect = document.getElementById('location-select').value;
             const finalLocation = locSelect === '其他' ? document.getElementById('custom-location').value : locSelect;
@@ -482,7 +467,7 @@
                                 事件概要: ${r.event.substring(0,25)}${r.event.length > 25 ? '...' : ''}
                             </div>
                         </div>
-                        <span style="color:var(--orange-theme); font-size:14px; font-weight: bold;">展開 ▾</span>
+                        <span style="color:var(--orange-theme); font-size:14px; font-weight:bold;">展開 ▾</span>
                     </div>
                     <div class="record-details">
                         <p><strong>💭 想法與相信程度:</strong></p>
@@ -497,4 +482,17 @@
                         <div>影響部位: ${r.bodyParts.join(', ') || '無'}</div>
                         <div style="font-style:italic; color:#718096; margin-bottom: 10px;">細節: ${r.physicalText || '無'}</div>
                         
+                        <p style="margin-top:10px;"><strong>🎯 採取應對措施:</strong></p>
+                        <ul>${r.coping.map(c => `<li>${c}</li>`).join('')}</ul>
                         
+                        <button class="btn-del" style="margin-top:15px; padding:6px 12px; font-size:12px;" onclick="deleteRecord(${r.id})">刪除此筆記錄</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function deleteRecord(id) {
+            if(confirm('確定要永久刪除這篇日記嗎？')) {
+                let records = JSON.parse(localStorage.getItem('cbt_records')) || [];
+                records = records.filter(r => r.id !== id);
+                localStorage.setItem('cbt_records
