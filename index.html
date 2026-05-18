@@ -284,215 +284,253 @@
     </div>
 
     <script>
-        // 核心密碼驗證：點擊按鈕執行，徹底排除阻擋問題
-        function verifyPIN() {
-            const pin = document.getElementById('pin-field').value;
-            if(pin === '1234') {
-                document.getElementById('lock-screen').style.setProperty('display', 'none', 'important');
-            } else {
-                alert('密碼錯誤，請再試一次。');
-                document.getElementById('pin-field').value = '';
+    // 修正：確保能正確抓取輸入框數值並解鎖
+    function verifyPIN() {
+        const pinField = document.getElementById('pin-field');
+        
+        if (!pinField) {
+            alert('系統錯誤：找不到密碼輸入欄位。');
+            return;
+        }
+        
+        const pin = pinField.value;
+        if (pin === '1234') {
+            document.getElementById('lock-screen').style.display = 'none';
+        } else {
+            alert('密碼錯誤，請再試一次。');
+            pinField.value = '';
+        }
+    }
+
+    // 分頁切換邏輯
+    function switchTab(tabId) {
+        document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        
+        const targetContainer = document.getElementById(tabId);
+        if (targetContainer) {
+            targetContainer.classList.add('active');
+        }
+        if (event && event.target) {
+            event.target.classList.add('active');
+        }
+    }
+
+    // 即時顯示數值
+    function updateSliderText(slider) {
+        slider.nextElementSibling.innerText = slider.value + '%';
+    }
+
+    // 其他地點欄位聯動
+    function toggleCustomLoc() {
+        const select = document.getElementById('location-select');
+        const customInput = document.getElementById('custom-location');
+        customInput.style.display = (select.value === '其他') ? 'block' : 'none';
+    }
+
+    // 動態增減想法區塊 (包含獨立滑桿)
+    function addThoughtField() {
+        const container = document.getElementById('thoughts-container');
+        const div = document.createElement('div');
+        div.className = 'thought-block';
+        div.innerHTML = `
+            <div class="thought-row">
+                <input type="text" class="thought-input" placeholder="想法內容...">
+                <button class="btn-del" style="padding: 6px 12px; margin-bottom: 10px;" onclick="this.parentElement.parentElement.remove()">✕</button>
+            </div>
+            <div class="slider-container">
+                <span style="font-size: 14px; color:#4a5568;">相信程度：</span>
+                <input type="range" class="belief-intensity" min="0" max="100" value="50" oninput="updateSliderText(this)">
+                <span class="slider-val">50%</span>
+            </div>
+        `;
+        container.appendChild(div);
+    }
+
+    // 允許自訂新增額外的情緒與滑桿
+    function addUserEmotion() {
+        const customName = prompt('請輸入你想記錄的情緒名稱 (例如: 孤單、緊張)：');
+        if (!customName || customName.trim() === "") return;
+        
+        const container = document.getElementById('emotion-grid-container');
+        const div = document.createElement('div');
+        div.className = 'emotion-btn';
+        div.onclick = function() { toggleEmotion(this); };
+        div.innerHTML = `
+            <span>${customName.trim()} ✨</span>
+            <div class="emotion-slider-box" onclick="event.stopPropagation()">
+                <div class="slider-container">
+                    <input type="range" class="emotion-slider" min="0" max="100" value="50" oninput="updateSliderText(this)">
+                    <span class="slider-val">50%</span>
+                </div>
+            </div>
+        `;
+        container.appendChild(div);
+    }
+
+    function addCopingField() {
+        const container = document.getElementById('coping-container');
+        const div = document.createElement('div');
+        div.className = 'dynamic-row';
+        div.innerHTML = `<input type="text" class="coping-input" placeholder="應對方式..."><button class="btn-del" onclick="this.parentElement.remove()">✕</button>`;
+        container.appendChild(div);
+    }
+
+    // 情緒區塊選擇狀態切換
+    function toggleEmotion(btn) {
+        btn.classList.toggle('selected');
+    }
+
+    // 身體圖示點擊互動
+    document.querySelectorAll('.part').forEach(part => {
+        part.addEventListener('click', () => {
+            part.classList.toggle('selected');
+        });
+    });
+
+    // 儲存功能（LocalStorage）
+    function saveRecord() {
+        const locSelect = document.getElementById('location-select').value;
+        const finalLocation = locSelect === '其他' ? document.getElementById('custom-location').value : locSelect;
+        
+        const thoughtsArray = [];
+        document.querySelectorAll('.thought-block').forEach(block => {
+            const textVal = block.querySelector('.thought-input').value;
+            if(textVal) {
+                const sliderVal = block.querySelector('.belief-intensity').value;
+                thoughtsArray.push({ text: textVal, belief: parseInt(sliderVal) });
             }
-        }
+        });
 
-        // 分頁切換邏輯
-        function switchTab(tabId) {
-            document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            
-            // 處理標籤高亮
-            const tabsList = document.querySelectorAll('.tab');
-            if(tabId === 'new-record') tabsList[0].classList.add('active');
-            if(tabId === 'my-records') tabsList[1].classList.add('active');
-            if(tabId === 'insights') tabsList[2].classList.add('active');
-        }
+        const coping = Array.from(document.querySelectorAll('.coping-input')).map(i => i.value).filter(v => v);
+        
+        const selectedEmotions = [];
+        document.querySelectorAll('.emotion-btn.selected').forEach(btn => {
+            const name = btn.querySelector('span').innerText;
+            const intensity = btn.querySelector('.emotion-slider').value;
+            selectedEmotions.push({ name, intensity: parseInt(intensity) });
+        });
 
-        // 即時顯示數值
-        function updateSliderText(slider) {
-            slider.nextElementSibling.innerText = slider.value + '%';
-        }
+        const selectedBodyParts = Array.from(document.querySelectorAll('.part.selected')).map(p => p.id.replace('part-', ''));
 
-        // 其他地點欄位聯動
-        function toggleCustomLoc() {
-            const select = document.getElementById('location-select');
-            const customInput = document.getElementById('custom-location');
-            customInput.style.display = (select.value === '其他') ? 'block' : 'none';
-        }
+        const record = {
+            id: Date.now(),
+            date: new Date().toLocaleString('zh-HK'),
+            location: finalLocation || '未指定地點',
+            event: document.getElementById('event-text').value,
+            thoughts: thoughtsArray,
+            emotions: selectedEmotions,
+            bodyParts: selectedBodyParts,
+            physicalText: document.getElementById('physical-text').value,
+            coping: coping
+        };
 
-        // 動態增減想法區塊 (包含獨立滑桿)
-        function addThoughtField() {
-            const container = document.getElementById('thoughts-container');
-            const div = document.createElement('div');
-            div.className = 'thought-block';
-            div.innerHTML = `
+        let records = JSON.parse(localStorage.getItem('cbt_records')) || [];
+        records.unshift(record);
+        localStorage.setItem('cbt_records', JSON.stringify(records));
+
+        alert('日記已成功安全儲存！');
+        resetForm();
+        switchTab('my-records');
+        renderRecords();
+    }
+
+    function resetForm() {
+        document.getElementById('event-text').value = '';
+        document.getElementById('physical-text').value = '';
+        document.getElementById('custom-location').value = '';
+        document.getElementById('location-select').selectedIndex = 0;
+        document.getElementById('thoughts-container').innerHTML = `
+            <div class="thought-block">
                 <div class="thought-row">
                     <input type="text" class="thought-input" placeholder="想法內容...">
-                    <button class="btn-del" style="padding: 6px 12px; margin-bottom: 10px;" onclick="this.parentElement.parentElement.remove()">✕</button>
                 </div>
                 <div class="slider-container">
-                    <span style="font-size: 14px; color:#4a5568; font-weight: bold;">相信程度：</span>
+                    <span style="font-size: 14px; color:#4a5568;">相信程度：</span>
                     <input type="range" class="belief-intensity" min="0" max="100" value="50" oninput="updateSliderText(this)">
                     <span class="slider-val">50%</span>
                 </div>
-            `;
-            container.appendChild(div);
+            </div>`;
+        document.getElementById('coping-container').innerHTML = `<div class="dynamic-row"><input type="text" class="coping-input" placeholder="例如：深呼吸、離開現場..."></div>`;
+        document.querySelectorAll('.emotion-btn').forEach(b => b.classList.remove('selected'));
+        document.querySelectorAll('.part').forEach(p => p.classList.remove('selected'));
+    }
+
+    // 渲染歷史日記（已更改標籤為「想法」）
+    function renderRecords() {
+        const list = document.getElementById('records-list');
+        const records = JSON.parse(localStorage.getItem('cbt_records')) || [];
+        
+        if(records.length === 0) {
+            list.innerHTML = '<p style="text-align:center; color:#a0aec0; margin-top:20px;">尚無任何日記記錄。</p>';
+            return;
         }
 
-        // 允許自訂新增額外的情緒與滑桿
-        function addUserEmotion() {
-            const customName = prompt('請輸入你想記錄的情緒名稱 (例如: 孤單、緊張)：');
-            if (!customName || customName.trim() === "") return;
-            
-            const container = document.getElementById('emotion-grid-container');
-            const div = document.createElement('div');
-            div.className = 'emotion-btn';
-            div.onclick = function() { toggleEmotion(this); };
-            div.innerHTML = `
-                <span>${customName.trim()} ✨</span>
-                <div class="emotion-slider-box" onclick="event.stopPropagation()">
-                    <div class="slider-container">
-                        <input type="range" class="emotion-slider" min="0" max="100" value="50" oninput="updateSliderText(this)">
-                        <span class="slider-val">50%</span>
+        list.innerHTML = records.map(r => `
+            <div class="card record-card">
+                <div class="record-header" onclick="this.nextElementSibling.classList.toggle('open')">
+                    <div>
+                        <strong>${r.date}</strong> <span class="badge">${r.location}</span>
+                        <div style="margin-top:5px; font-size:14px; color:#4a5568;">
+                            事件概要: ${r.event.substring(0,25)}${r.event.length > 25 ? '...' : ''}
+                        </div>
                     </div>
+                    <span style="color:var(--orange-theme); font-size:14px;">展開 ▾</span>
                 </div>
-            `;
-            container.appendChild(div);
-        }
+                <div class="record-details">
+                    <p><strong>💭 想法與相信程度:</strong></p>
+                    <ul style="padding-left: 20px; margin-bottom: 10px;">
+                        ${r.thoughts.map(t => `<li>${t.text} <span style="color:var(--orange-theme); font-weight:bold;">(${t.belief}%)</span></li>`).join('')}
+                    </ul>
+                    
+                    <p style="margin-top:10px;"><strong>😊 觀察到的情緒:</strong></p>
+                    <div style="margin-bottom: 10px;">${r.emotions.map(e => `<span class="badge badge-emotion">${e.name}: ${e.intensity}%</span>`).join('')}</div>
+                    
+                    <p style="margin-top:10px;"><strong>💆🏻 身體反應部位:</strong></p>
+                    <div>影響部位: ${r.bodyParts.join(', ') || '無'}</div>
+                    <div style="font-style:italic; color:#718096; margin-bottom: 10px;">細節: ${r.physicalText || '無'}</div>
+                    
+                    <p style="margin-top:10px;"><strong>🎯 採取應對措施:</strong></p>
+                    <ul>${r.coping.map(c => `<li>${c}</li>`).join('')}</ul>
+                    
+                    <button class="btn-del" style="margin-top:15px; padding:6px 12px; font-size:12px;" onclick="deleteRecord(${r.id})">刪除此筆記錄</button>
+                </div>
+            </div>
+        `).join('');
+    }
 
-        function addCopingField() {
-            const container = document.getElementById('coping-container');
-            const div = document.createElement('div');
-            div.className = 'dynamic-row';
-            div.innerHTML = `<input type="text" class="coping-input" placeholder="應對方式..."><button class="btn-del" onclick="this.parentElement.remove()">✕</button>`;
-            container.appendChild(div);
-        }
-
-        // 情緒區塊選擇狀態切換
-        function toggleEmotion(btn) {
-            btn.classList.toggle('selected');
-        }
-
-        // 身體圖示點擊互動
-        document.querySelectorAll('.part').forEach(part => {
-            part.addEventListener('click', () => {
-                part.classList.toggle('selected');
-            });
-        });
-
-        // 儲存功能（LocalStorage）
-        function saveRecord() {
-            const locSelect = document.getElementById('location-select').value;
-            const finalLocation = locSelect === '其他' ? document.getElementById('custom-location').value : locSelect;
-            
-            const thoughtsArray = [];
-            document.querySelectorAll('.thought-block').forEach(block => {
-                const textVal = block.querySelector('.thought-input').value;
-                if(textVal) {
-                    const sliderVal = block.querySelector('.belief-intensity').value;
-                    thoughtsArray.push({ text: textVal, belief: parseInt(sliderVal) });
-                }
-            });
-
-            const coping = Array.from(document.querySelectorAll('.coping-input')).map(i => i.value).filter(v => v);
-            
-            const selectedEmotions = [];
-            document.querySelectorAll('.emotion-btn.selected').forEach(btn => {
-                const name = btn.querySelector('span').innerText;
-                const intensity = btn.querySelector('.emotion-slider').value;
-                selectedEmotions.push({ name, intensity: parseInt(intensity) });
-            });
-
-            const selectedBodyParts = Array.from(document.querySelectorAll('.part.selected')).map(p => p.id.replace('part-', ''));
-
-            const record = {
-                id: Date.now(),
-                date: new Date().toLocaleString('zh-HK'),
-                location: finalLocation || '未指定地點',
-                event: document.getElementById('event-text').value,
-                thoughts: thoughtsArray,
-                emotions: selectedEmotions,
-                bodyParts: selectedBodyParts,
-                physicalText: document.getElementById('physical-text').value,
-                coping: coping
-            };
-
+    function deleteRecord(id) {
+        if(confirm('確定要永久刪除這篇日記嗎？')) {
             let records = JSON.parse(localStorage.getItem('cbt_records')) || [];
-            records.unshift(record);
+            records = records.filter(r => r.id !== id);
             localStorage.setItem('cbt_records', JSON.stringify(records));
-
-            alert('日記已成功安全儲存！');
-            resetForm();
-            switchTab('my-records');
             renderRecords();
         }
+    }
 
-        function resetForm() {
-            document.getElementById('event-text').value = '';
-            document.getElementById('physical-text').value = '';
-            document.getElementById('custom-location').value = '';
-            document.getElementById('location-select').selectedIndex = 0;
-            document.getElementById('thoughts-container').innerHTML = `
-                <div class="thought-block">
-                    <div class="thought-row">
-                        <input type="text" class="thought-input" placeholder="想法內容...">
-                    </div>
-                    <div class="slider-container">
-                        <span style="font-size: 14px; color:#4a5568; font-weight: bold;">相信程度：</span>
-                        <input type="range" class="belief-intensity" min="0" max="100" value="50" oninput="updateSliderText(this)">
-                        <span class="slider-val">50%</span>
-                    </div>
-                </div>`;
-            document.getElementById('coping-container').innerHTML = `<div class="dynamic-row"><input type="text" class="coping-input" placeholder="例如：深呼吸、離開現場..."></div>`;
-            document.querySelectorAll('.emotion-btn').forEach(b => b.classList.remove('selected'));
-            document.querySelectorAll('.part').forEach(p => p.classList.remove('selected'));
+    // 統計面版
+    function renderInsights() {
+        const records = JSON.parse(localStorage.getItem('cbt_records')) || [];
+        const totalEl = document.getElementById('stat-total-records');
+        if (totalEl) totalEl.innerText = records.length;
+
+        if(records.length === 0) {
+            const copingEl = document.getElementById('stat-coping');
+            if (copingEl) copingEl.innerHTML = '<li>尚無數據</li>';
+            return;
         }
 
-        // 渲染歷史日記
-        function renderRecords() {
-            const list = document.getElementById('records-list');
-            const records = JSON.parse(localStorage.getItem('cbt_records')) || [];
-            
-            if(records.length === 0) {
-                list.innerHTML = '<p style="text-align:center; color:#a0aec0; margin-top:20px;">尚無任何日記記錄。</p>';
-                return;
-            }
-
-            list.innerHTML = records.map(r => `
-                <div class="card record-card">
-                    <div class="record-header" onclick="this.nextElementSibling.classList.toggle('open')">
-                        <div>
-                            <strong>${r.date}</strong> <span class="badge">${r.location}</span>
-                            <div style="margin-top:5px; font-size:14px; color:#4a5568;">
-                                事件概要: ${r.event.substring(0,25)}${r.event.length > 25 ? '...' : ''}
-                            </div>
-                        </div>
-                        <span style="color:var(--orange-theme); font-size:14px; font-weight:bold;">展開 ▾</span>
-                    </div>
-                    <div class="record-details">
-                        <p><strong>💭 想法與相信程度:</strong></p>
-                        <ul style="padding-left: 20px; margin-bottom: 10px;">
-                            ${r.thoughts.map(t => `<li>${t.text} <span style="color:var(--orange-theme); font-weight:bold;">(${t.belief}%)</span></li>`).join('')}
-                        </ul>
-                        
-                        <p style="margin-top:10px;"><strong>😊 觀察到的情緒:</strong></p>
-                        <div style="margin-bottom: 10px;">${r.emotions.map(e => `<span class="badge badge-emotion">${e.name}: ${e.intensity}%</span>`).join('')}</div>
-                        
-                        <p style="margin-top:10px;"><strong>💆🏻 身體反應部位:</strong></p>
-                        <div>影響部位: ${r.bodyParts.join(', ') || '無'}</div>
-                        <div style="font-style:italic; color:#718096; margin-bottom: 10px;">細節: ${r.physicalText || '無'}</div>
-                        
-                        <p style="margin-top:10px;"><strong>🎯 採取應對措施:</strong></p>
-                        <ul>${r.coping.map(c => `<li>${c}</li>`).join('')}</ul>
-                        
-                        <button class="btn-del" style="margin-top:15px; padding:6px 12px; font-size:12px;" onclick="deleteRecord(${r.id})">刪除此筆記錄</button>
-                    </div>
-                </div>
-            `).join('');
+        // 統計應對機制
+        const copingCounts = {};
+        records.forEach(r => r.coping.forEach(c => {
+            copingCounts[c] = (copingCounts[c] || 0) + 1;
+        }));
+        const sortedCoping = Object.entries(copingCounts).sort((a,b) => b - a).slice(0, 5);
+        const copingEl = document.getElementById('stat-coping');
+        if (copingEl) {
+            copingEl.innerHTML = sortedCoping.map(([tool, count]) => `<li><span>${tool}</span><strong>${count} 次</strong></li>`).join('') || '<li>無應對數據</li>';
         }
-
-        function deleteRecord(id) {
-            if(confirm('確定要永久刪除這篇日記嗎？')) {
-                let records = JSON.parse(localStorage.getItem('cbt_records')) || [];
-                records = records.filter(r => r.id !== id);
-                localStorage.setItem('cbt_records
+    }
+</script>
+</body>
+</html>
