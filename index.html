@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBT 認知情緒思維日記</title>
+    <style>
+        :root {
+            --primary-grad: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --bg-color: #f7fafc;
+            --card-bg: #ffffff;
+            --text-main: #2d3748;
+            --purple-light: #e2e8f0;
+            --purple-active: #9f7aea;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        body { background: var(--bg-color); color: var(--text-main); padding-bottom: 60px; }
+        
+        /* 鎖定頁面 */
+        #lock-screen { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--primary-grad); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
+        .pin-input { font-size: 24px; padding: 10px; width: 150px; text-align: center; border-radius: 8px; border: none; margin-top: 20px; }
+        
+        header { background: var(--primary-grad); color: white; padding: 20px; text-align: center; font-weight: bold; font-size: 22px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        
+        /* 導覽列 */
+        .tabs { display: flex; justify-content: space-around; background: white; border-bottom: 1px solid #e2e8f0; sticky: top; }
+        .tab { flex: 1; text-align: center; padding: 15px 0; cursor: pointer; font-weight: bold; color: #718096; border-bottom: 3px solid transparent; }
+        .tab.active { color: #764ba2; border-bottom-color: #764ba2; }
+
+        .container { max-width: 600px; margin: 20px auto; padding: 0 15px; display: none; }
+        .container.active { display: block; }
+
+        /* 卡片與表單要素 */
+        .card { background: var(--card-bg); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .card-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #4a5568; display: flex; align-items: center; gap: 8px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; margin-top: 12px; }
+        select, textarea, input[type="text"] { width: 100%; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 16px; outline: none; margin-bottom: 10px; }
+        textarea { resize: vertical; min-height: 80px; }
+        
+        /* 滑桿組件 */
+        .slider-container { display: flex; align-items: center; gap: 15px; margin-top: 5px; }
+        input[type="range"] { flex: 1; accent-color: #764ba2; }
+        .slider-val { font-weight: bold; min-width: 45px; text-align: right; color: #764ba2; }
+
+        /* 動態多項輸入 */
+        .dynamic-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+        .btn-add { background: #e2e8f0; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-del { background: #fed7d7; color: #e53e3e; border: none; padding: 12px; border-radius: 8px; cursor: pointer; }
+
+        /* 情緒按鈕格線 */
+        .emotion-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .emotion-btn { background: #f7fafc; border: 2px solid #e2e8f0; padding: 12px; border-radius: 10px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; font-weight: bold; font-size: 15px; }
+        .emotion-btn.selected { background: #faf5ff; border-color: var(--purple-active); }
+        .emotion-slider-box { display: none; width: 100%; margin-top: 10px; }
+        .emotion-btn.selected .emotion-slider-box { display: block; }
+
+        /* 互動式身體地圖 */
+        .bodymap-container { display: flex; justify-content: center; margin: 15px 0; }
+        .body-svg { width: 220px; height: auto; }
+        .part { fill: #cbd5e0; stroke: #fff; stroke-width: 1.5; cursor: pointer; transition: fill 0.2s; }
+        .part.selected { fill: #9f7aea; }
+
+        .btn-submit { width: 100%; background: var(--primary-grad); color: white; border: none; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(118,75,162,0.3); }
+
+        /* 歷史紀錄顯示頁 */
+        .record-card { border-left: 5px solid #764ba2; }
+        .record-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .record-details { display: none; margin-top: 15px; border-top: 1px solid #edf2f7; padding-top: 15px; }
+        .record-details.open { display: block; }
+        .badge { background: #edf2f7; padding: 3px 8px; border-radius: 12px; font-size: 12px; margin-right: 5px; display: inline-block; }
+        .badge-emotion { background: #faf5ff; color: #764ba2; border: 1px solid #e9d8fd; }
+
+        /* 數據洞察儀表板 */
+        .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .stat-num { font-size: 24px; font-weight: bold; color: #764ba2; margin-top: 5px; }
+        .list-ranking { list-style: none; }
+        .list-ranking li { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edf2f7; }
+    </style>
+</head>
+<body>
+
+    <!-- 密碼鎖定畫面 -->
+    <div id="lock-screen">
+        <h2>安全驗證</h2>
+        <p>請輸入安全個人密碼 (預設: 1234)</p>
+        <input type="password" id="pin-field" class="pin-input" placeholder="請輸入密碼" maxlength="4" oninput="verifyPIN()">
+    </div>
+
+    <header>CBT 心靈思維日記</header>
+
+    <!-- 分頁導覽欄 -->
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('new-record')">新建記錄</div>
+        <div class="tab" onclick="switchTab('my-records'); renderRecords();">我的日記</div>
+        <div class="tab" onclick="switchTab('insights'); renderInsights();">數據洞察</div>
+    </div>
+
+    <!-- 主要內容區 -->
+    <!-- 1. 新建日記表單 -->
+    <div id="new-record" class="container active">
+        <!-- 位置區域 -->
+        <div class="card">
+            <div class="card-title">📍 當前位置</div>
+            <select id="location-select" onchange="toggleCustomLoc()">
+                <option value="家中">家中</option>
+                <option value="醫院">醫院</option>
+                <option value="學校">學校</option>
+                <option value="戶外">戶外</option>
+                <option value="其他">其他 (請於下方輸入)</option>
+            </select>
+            <input type="text" id="custom-location" style="display:none;" placeholder="請輸入具體地點...">
+        </div>
+
+        <!-- 情境事件 -->
+        <div class="card">
+            <div class="card-title">📌 情境事件</div>
+            <label>當時發生了什麼事？(請客觀客觀描述事實)</label>
+            <textarea id="event-text" placeholder="例如：在開會報告時，主管打斷了我的發言..."></textarea>
+        </div>
+
+        <!-- 自動思維 -->
+        <div class="card">
+            <div class="card-title">💭 自動思維</div>
+            <label>當時腦海裡浮現出什麼想法？</label>
+            <div id="thoughts-container">
+                <div class="dynamic-row">
+                    <input type="text" class="thought-input" placeholder="想法內容...">
+                </div>
+            </div>
+            <button class="btn-add" onclick="addThoughtField()">＋ 新增想法</button>
+            
+            <label>您對上述核心想法的相信程度？</label>
+            <div class="slider-container">
+                <input type="range" id="belief-intensity" min="0" max="100" value="50" oninput="updateSliderText(this)">
+                <span class="slider-val" id="belief-intensity-val">50%</span>
+            </div>
+        </div>
+
+        <!-- 當下情緒 -->
+        <div class="card">
+            <div class="card-title">😊 當下情緒</div>
+            <label>選取所有符合當下的情緒並評估強度：</label>
+            <div class="emotion-grid">
+                <div class="emotion-btn" onclick="toggleEmotion(this, '焦慮 😰')">
+                    <span>焦慮 😰</span>
+                    <div class="emotion-slider-box" onclick="event.stopPropagation()">
+                        <div class="slider-container">
+                            <input type="range" class="emotion-slider" min="0" max="100" value="50" oninput="updateSliderText(this)">
+                            <span class="slider-val">50%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="emotion-btn" onclick="toggleEmotion(this, '傷心 😢')">
+                    <span>傷心 😢</span>
+                    <div class="emotion-slider-box" onclick="event.stopPropagation()">
+                        <div class="slider-container">
+                            <input type="range" class="emotion-slider" min="0" max="100" value="50" oninput="updateSliderText(this)">
+                            <span class="slider-val">50%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="emotion-btn" onclick="toggleEmotion(this, '生氣 😠')">
+                    <span>生氣 😠</span>
+                    <div class="emotion-slider-box" onclick="event.stopPropagation()">
+                        <div class="slider-container">
+                            <input type="range" class="emotion-slider" min="0" max="100" value="50" oninput="updateSliderText(this)">
+                            <span class="slider-val">50%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="emotion-btn" onclick="toggleEmotion(this, '挫折 😤')">
+                    <span>挫折 😤</span>
+                    <div class="emotion-slider-box" onclick="event.stopPropagation()">
+                        <div class="slider-container">
+                            <input type="range" class="emotion-slider" min="0" max="100" value="50" oninput="updateSliderText(this)">
+                            <span class="slider-val">50%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="emotion-btn" onclick="toggleEmotion(this, '崩潰 😵')">
+                    <span>崩潰 😵</span>
+                    <div class="emotion-slider-box" onclick="event.stopPropagation()">
+                        <div class="slider-container">
+                            <input type="range" class="emotion-slider" min="0" max="100" value="50" oninput="updateSliderText(this)">
+                            <span class="slider-val">50%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="emotion-btn" onclick="toggleEmotion(this, '平靜 😌')">
+                    <span>平靜 😌</span>
+                    <div class="emotion-slider-box" onclick="event.stopPropagation()">
+                        <div class="slider-container">
+                            <input type="range" class="emotion-slider" min="0" max="100" value="50" oninput="updateSliderText(this)">
+                            <span class="slider-val">50%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="emotion-btn" onclick="toggleEmotion(this, '快樂 😊')">
+                    <span>快樂 😊</span>
+                    <div class="emotion-slider-box" onclick="event.stopPropagation()">
+                        <div class="slider-container">
+                            <input type="range" class="emotion-slider" min="0" max="100" value="50" oninput="updateSliderText(this)">
+                            <span class="slider-val">50%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="emotion-btn" onclick="toggleEmotion(this, '抱有希望 🙂')">
+                    <span>抱有希望 🙂</span>
+                    <div class="emotion-slider-box" onclick="event.stopPropagation()">
+                        <div class="slider-container">
+                            <input type="range" class="emotion-slider" min="0" max="100" value="50" oninput="updateSliderText(this)">
+                            <span class="slider-val">50%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 身體感知 -->
+        <div class="card">
+            <div class="card-title">💪 生理感知</div>
+            <label>點擊人體圖示選取不適或顯著感知的部位：</label>
+            <div class="bodymap-container">
+                <!-- 簡式人體SVG圖 (包含13個主要部分) -->
+                <svg class="body-svg" viewBox="0 0 200 400">
+                    <circle id="part-頭部" class="part" cx="100" cy="40" r="22"/>
+                    <rect id="part-頸部" class="part" x="93" y="65" width="14" height="12" rx="2"/>
+                    <path id="part-左肩" class="part" d="M70,78 C80,76 90,78 93,80 L88,95 L65,92 Z"/>
+                    <path id="part-右肩" class="part" d="M130,78 C120,76 110,78 107,80 L112,95 L135,92 Z"/>
+                    <rect id="part-胸口" class="part" x="80" y="85" width="40" height="40" rx="3"/>
+                    <rect id="part-上腹部" class="part" x="82" y="128" width="36" height="30"/>
+                    <rect id="part-骨盆腹下" class="part" x="80" y="161" width="40" height="25" rx="5"/>
+                    <path id="part-左臂" class="part" d="M62,95 L75,97 L65,160 L52,155 Z"/>
+                    <path id="part-右臂" class="part" d="M138,95 L125,97 L135,160 L148,155 Z"/>
+                    <path id="part-左腿" class="part" d="M82,188 L98,188 L95,290 L78,290 Z"/>
+                    <path id="part-右腿" class="part" d="M102,188 L118,188 L122,290 L105,290 Z"/>
+                    <rect id="part-左腳" class="part" x="73" y="293" width="22" height="12" rx="4"/>
+                    <rect id="part-右腳" class="part" x="105" y="293" width="22" height="12" rx="4"/>
+                </svg>
+            </div>
+            <label>具體身體感知描述 (例如：呼吸困難、心跳加速、緊繃)：</label>
+            <textarea id="physical-text" placeholder="請寫下身體感受..."></textarea>
+        </div>
+
+        <!-- 行為及應對 -->
+        <div class="card">
+            <div class="card-title">🎯 行為與應對</div>
+            <label>你當時做了什麼來應對？(可新增多項)</label>
+            <div id="coping-container">
+                <div class="dynamic-row">
+                    <input type="text" class="coping-input" placeholder="例如：深呼吸、離開現場...">
+                </div>
+            </div>
+            <button class="btn-add" onclick="addCopingField()">＋ 新增應對方式</button>
+        </div>
+
+        <!-- 提交按鈕 -->
+        <button class="btn-submit" onclick="saveRecord()">儲存今日日記</button>
+    </div>
+
+    <!-- 2. 歷史記錄查看頁 -->
+    <div id="my-records" class="container">
+        <div id="records-list"><!-- 動態生成 --></div>
+    </div>
+
+    <!-- 3. 數據統計與洞察面版 -->
+    <div id="insights" class="container">
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div>總日記篇數</div>
+                <div class="stat-num" id="stat-total-records">0</div>
+            </div>
+            <div class="stat-card">
+                <div>平均思維真實度</div>
+                <div class="stat-num" id="stat-avg-belief">0%</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-title">📊 最常出現的心情</div>
+            <ul id="stat-emotions" class="list-ranking"></ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">🛠️ 常用應對策略</div>
+            <ul id="stat-coping" class="list-ranking"></ul>
+        </div>
+    </div>
+
+    <script>
+        // 安全 PIN 驗證 (預設 1234)
+        function verifyPIN() {
+            const pin = document.getElementById('pin-field').value;
+            if(pin === '1234') {
+                document.getElementById('lock-screen').style.display = 'none';
+            }
+        }
+
+        // 分頁切換邏輯
+        function switchTab(tabId) {
+            document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // 即時顯示數值
+        function updateSliderText(slider) {
+            slider.nextElementSibling.innerText = slider.value + '%';
+        }
+
+        // 其他地點欄位聯動
+        function toggleCustomLoc() {
+            const select = document.getElementById('location-select');
+            const customInput = document.getElementById('custom-location');
+            customInput.style.display = (select.value === '其他') ? 'block' : 'none';
+        }
+
+        // 動態增減文字輸入列
+        function addThoughtField() {
+            const container = document.getElementById('thoughts-container');
+            const div = document.createElement('div');
+            div.className = 'dynamic-row';
+            div.innerHTML = `<input type="text" class="thought-input" placeholder="想法內容..."><button class="btn-del" onclick="this.parentElement.remove()">✕</button>`;
+            container.appendChild(div);
+        }
+
+        function addCopingField() {
+            const container = document.getElementById('coping-container');
+            const div = document.createElement('div');
+            div.className = 'dynamic-row';
+            div.innerHTML = `<input type="text" class="coping-input" placeholder="應對方式..."><button class="btn-del" onclick="this.parentElement.remove()">✕</button>`;
+            container.appendChild(div);
+        }
+
+        // 情緒區塊選擇狀態切換
+        function toggleEmotion(btn, emotionName) {
+            btn.classList.toggle('selected');
+        }
+
+        // 身體圖示點擊互動
+        document.querySelectorAll('.part').forEach(part => {
+            part.addEventListener('click', () => {
+                part.classList.toggle('selected');
+            });
+        });
+
+        // 核心儲存功能（LocalStorage）
+        function saveRecord() {
+            const locSelect = document.getElementById('location-select').value;
+            const finalLocation = locSelect === '其他' ? document.getElementById('custom-location').value : locSelect;
+            
+            const thoughts = Array.from(document.querySelectorAll('.thought-input')).map(i => i.value).filter(v => v);
+            const coping = Array.from(document.querySelectorAll('.coping-input')).map(i => i.value).filter(v => v);
+            
+            const selectedEmotions = [];
+            document.querySelectorAll('.emotion-btn.selected').forEach(btn => {
+                const name = btn.querySelector('span').innerText;
+                const intensity = btn.querySelector('.emotion-slider').value;
+                selectedEmotions.push({ name, intensity: parseInt(intensity) });
+            });
+
+            const selectedBodyParts = Array.from(document.querySelectorAll('.part.selected')).map(p => p.id.replace('part-', ''));
+
+            const record = {
+                id: Date.now(),
+                date: new Date().toLocaleString('zh-HK'),
+                location: finalLocation || '未指定地點',
+                event: document.getElementById('event-text').value,
+                thoughts: thoughts,
+                beliefIntensity: parseInt(document.getElementById('belief-intensity').value),
+                emotions: selectedEmotions,
+                bodyParts: selectedBodyParts,
+                physicalText: document.getElementById('physical-text').value,
+                coping: coping
+            };
+
+            let records = JSON.parse(localStorage.getItem('cbt_records')) || [];
+            records.unshift(record);
+            localStorage.setItem('cbt_records', JSON.stringify(records));
+
+            alert('日記已成功安全儲存！');
+            resetForm();
+            switchTab('my-records');
+            renderRecords();
+        }
+
+        function resetForm() {
+            document.getElementById('event-text').value = '';
+            document.getElementById('physical-text').value = '';
+            document.getElementById('custom-location').value = '';
+            document.getElementById('location-select').selectedIndex = 0;
+            document.getElementById('belief-intensity').value = 50;
+            document.getElementById('belief-intensity-val').innerText = '50%';
+            document.getElementById('thoughts-container').innerHTML = `<div class="dynamic-row"><input type="text" class="thought-input" placeholder="想法內容..."></div>`;
+            document.getElementById('coping-container').innerHTML = `<div class="dynamic-row"><input type="text" class="coping-input" placeholder="例如：深呼吸、離開現場..."></div>`;
+            document.querySelectorAll('.emotion-btn').forEach(b => b.classList.remove('selected'));
+            document.querySelectorAll('.part').forEach(p => p.classList.remove('selected'));
+        }
+
+        // 渲染歷史日記
+        function renderRecords() {
+            const list = document.getElementById('records-list');
+            const records = JSON.parse(localStorage.getItem('cbt_records')) || [];
+            
+            if(records.length === 0) {
+                list.innerHTML = '<p style="text-align:center; color:#a0aec0; margin-top:20px;">尚無任何日記記錄。</p>';
+                return;
+            }
+
+            list.innerHTML = records.map(r => `
+                <div class="card record-card">
+                    <div class="record-header" onclick="this.nextElementSibling.classList.toggle('open')">
+                        <div>
+                            <strong>${r.date}</strong> <span class="badge">${r.location}</span>
+                            <div style="margin-top:5px; font-size:14px; color:#4a5568;">
+                                事件概要: ${r.event.substring(0,25)}${r.event.length > 25 ? '...' : ''}
+                            </div>
+                        </div>
+                        <span style="color:#764ba2; font-size:14px;">展開 ▾</span>
+                    </div>
+                    <div class="record-details">
+                        <p><strong>💭 自動思維及真實度 (${r.beliefIntensity}%):</strong></p>
+                        <ul>${r.thoughts.map(t => `<li>${t}</li>`).join('')}</ul>
+                        
+                        <p style="margin-top:10px;"><strong>😊 情緒感受:</strong></p>
+                        <div>${r.emotions.map(e => `<span class="badge badge-emotion">${e.name}: ${e.intensity}%</span>`).join('')}</div>
+                        
+                        <p style="margin-top:10px;"><strong>💪 生理反應:</strong></p>
+                        <div>影響部位: ${r.bodyParts.join(', ') || '無'}</div>
+                        <div style="font-style:italic; color:#718096;">細節: ${r.physicalText || '無'}</div>
+                        
+                        <p style="margin-top:10px;"><strong>🎯 採取應對措施:</strong></p>
+                        <ul>${r.coping.map(c => `<li>${c}</li>`).join('')}</ul>
+                        
+                        <button class="btn-del" style="margin-top:15px; padding:6px 12px; font-size:12px;" onclick="deleteRecord(${r.id})">刪除此筆記錄</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function deleteRecord(id) {
+            if(confirm('確定要永久刪除這篇日記嗎？')) {
+                let records = JSON.parse(localStorage.getItem('cbt_records')) || [];
+                records = records.filter(r => r.id !== id);
+                localStorage.setItem('cbt_records', JSON.stringify(records));
+                renderRecords();
+            }
+        }
+
+        // 核心數據大腦 - 分析與洞察
+        function renderInsights() {
+            const records = JSON.parse(localStorage.getItem('cbt_records')) || [];
+            document.getElementById('stat-total-records').innerText = records.length;
+
+            if(records.length === 0) {
+                document.getElementById('stat-avg-belief').innerText = '0%';
+                document.getElementById('stat-emotions').innerHTML = '<li>尚無數據</li>';
+                document.getElementById('stat-coping').innerHTML = '<li>尚無數據</li>';
+                return;
+            }
+
+            // 計算平均相信強度
+            const totalBelief = records.reduce((sum, r) => sum + r.beliefIntensity, 0);
+            document.getElementById('stat-avg-belief').innerText = Math.round(totalBelief / records.length) + '%';
+
+            // 統計情緒頻率
+            const emotionCounts = {};
+            records.forEach(r => r.emotions.forEach(e => {
+                emotionCounts[e.name] = (emotionCounts[e.name] || 0) + 1;
+            }));
+            const sortedEmotions = Object.entries(emotionCounts).sort((a,b) => b[1] - a[1]);
+            document.getElementById('stat-emotions').innerHTML = sortedEmotions.map(([name, count]) => `<li><span>${name}</span><strong>${count} 次</strong></li>`).join('') || '<li>無情緒數據</li>';
+
+            // 統計應對機制
+            const copingCounts = {};
+            records.forEach(r => r.coping.forEach(c => {
+                copingCounts[c] = (copingCounts[c] || 0) + 1;
+            }));
+            const sortedCoping = Object.entries(copingCounts).sort((a,b) => b[1] - a[1]).slice(0, 5);
+            document.getElementById('stat-coping').innerHTML = sortedCoping.map(([tool, count]) => `<li><span>${tool}</span><strong>${count} 次</strong></li>`).join('') || '<li>無應對數據</li>';
+        }
+    </script>
+</body>
+</html>
